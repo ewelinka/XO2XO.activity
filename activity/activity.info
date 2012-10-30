@@ -1,0 +1,9 @@
+[Activity]
+name = XO to XO
+service_name = XO2XOActivity
+icon = XO2XO
+exec = sugar-activity XO2XOActivity.XO2XOActivity
+show_launcher = yes
+activity_version = 1
+mime_types = text/plain;application/zip
+license = GPLv2+
