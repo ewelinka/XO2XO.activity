@@ -4,43 +4,31 @@ from sugar.activity import activity
 from sugar.graphics.toolbutton import ToolButton
 from sugar.graphics.toolbox import Toolbox
 from sugar.graphics.objectchooser import ObjectChooser
+import TestGame
+import pygame, logging
 
-import logging
 
 class XO2XOActivity(activity.Activity):
-	def hello(self, widget, data=None):
-		logging.info('Hello World')
+    RED  = 0xAA0000
 
-	def __init__(self, handle):
-		print "running activity init", handle
-		activity.Activity.__init__(self, handle)
-		print "activity running"
+    def __init__(self, handle):
+        print "running activity init", handle
+        activity.Activity.__init__(self, handle)
+        print "activity running"
 
-		# Creates the Toolbox. It contains the Activity Toolbar, which is the
-		# bar that appears on every Sugar window and contains essential
-		# functionalities, such as the 'Collaborate' and 'Close' buttons.
-		toolbox = ActivityToolbox(self)
-		self.set_toolbox(toolbox)
-		toolbox.show()
+        toolbox = ActivityToolboxXO2XO(self)
+        self.set_toolbox(toolbox)
+        toolbox.show()
+        
+        self.size = (800,600)
+        self.screen = pygame.display.set_mode(self.size)
+        
+        # inicio el juego para que se vea algo
+        self.juego = TestGame(self.screen)
 
-		# Creates a new button with the label "Hello World".
-		self.button = gtk.Button("Hello World")
+        print "AT END OF THE CLASS"
 
-		# When the button receives the "clicked" signal, it will call the
-		# function hello() passing it None as its argument.  The hello()
-		# function is defined above.
-		self.button.connect("clicked", self.hello, None)
-
-		# Set the button to be our canvas. The canvas is the main section of
-		# every Sugar Window. It fills all the area below the toolbox.
-		self.set_canvas(self.button)
-
-		# The final step is to display this newly created widget.
-		self.button.show()
-
-		print "AT END OF THE CLASS"
-
-class ActivityToolbar(gtk.Toolbar):
+class ActivityToolbarXO2XO(gtk.Toolbar):
     """The Activity toolbar with the Journal entry title, sharing
        and Stop buttons
 
@@ -66,17 +54,6 @@ class ActivityToolbar(gtk.Toolbar):
             self.insert(separator, -1)
             separator.show()
         print "***************** estoy aca!3 *****************"
-        #if activity.metadata:
-        #    description_item = DescriptionItem(activity)
-        #    description_item.show()
-        #    self.insert(description_item, -1)
-
-        #self.share = ShareButton(activity)
-        #self.share.show()
-        #self.insert(self.share, -1)
-
-        # DEPRECATED
-        #self.keep = KeepButton(activity)
         self._object_insert = ToolButton('object-insert')
         self.insert(self._object_insert, -1)
         self._object_insert.show()
@@ -102,29 +79,12 @@ class ActivityToolbar(gtk.Toolbar):
             chooser.destroy()
             del chooser
 
-class ActivityToolbox(Toolbox):
-    """Creates the Toolbox for the Activity
-
-    By default, the toolbox contains only the ActivityToolbar. After creating
-    the toolbox, you can add your activity specific toolbars, for example the
-    EditToolbar.
-
-    To add the ActivityToolbox to your Activity in MyActivity.__init__() do:
-
-        # Create the Toolbar with the ActivityToolbar:
-        toolbox = activity.ActivityToolbox(self)
-        ... your code, inserting all other toolbars you need, like EditToolbar
-
-        # Add the toolbox to the activity frame:
-        self.set_toolbar_box(toolbox)
-        # And make it visible:
-        toolbox.show()
-    """
+class ActivityToolboxXO2XO(Toolbox):
 
     def __init__(self, activity):
         Toolbox.__init__(self)
 
-        self._activity_toolbar = ActivityToolbar(activity)
+        self._activity_toolbar = ActivityToolbarXO2XO(activity)
         self.add_toolbar('Activity', self._activity_toolbar)
         self._activity_toolbar.show()
 
