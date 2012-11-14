@@ -4,12 +4,13 @@ from sugar.activity import activity
 from sugar.graphics.toolbutton import ToolButton
 from sugar.graphics.toolbox import Toolbox
 from sugar.graphics.objectchooser import ObjectChooser
-import TestGame
+
 import pygame, logging
+import gobject
+import sugargame.canvas
 
 
 class XO2XOActivity(activity.Activity):
-    RED  = 0xAA0000
 
     def __init__(self, handle):
         print "running activity init", handle
@@ -19,13 +20,17 @@ class XO2XOActivity(activity.Activity):
         toolbox = ActivityToolboxXO2XO(self)
         self.set_toolbox(toolbox)
         toolbox.show()
-        
-        self.size = (800,600)
-        self.screen = pygame.display.set_mode(self.size)
-        
-        # inicio el juego para que se vea algo
-        self.juego = TestGame(self.screen)
 
+        self.game = ShowGame()
+
+        self._pygamecanvas = \
+            sugargame.canvas.PygameCanvas(self)
+        # Note that set_canvas implicitly calls
+        # read_file when resuming from the Journal.
+        self.set_canvas(self._pygamecanvas)
+
+        # Start the game running.
+        self._pygamecanvas.run_pygame(self.game.run)
         print "AT END OF THE CLASS"
 
 class ActivityToolbarXO2XO(gtk.Toolbar):
@@ -74,10 +79,14 @@ class ActivityToolbarXO2XO(gtk.Toolbar):
                 logging.debug('ObjectChooser: %r' % chooser.get_selected_object())
                 jobject = chooser.get_selected_object()
                 if jobject and jobject.file_path:
-                    self._activity.area.loadImage(jobject.file_path)
+                    self._activity.game.loadPic(jobject.file_path)
+                    #self._activity.screen.loadImage(jobject.file_path)
+
+
         finally:
             chooser.destroy()
             del chooser
+
 
 class ActivityToolboxXO2XO(Toolbox):
 
@@ -102,3 +111,25 @@ class StopButton(ToolButton):
 
     def __stop_button_clicked_cb(self, button, activity):
         activity.close()
+
+class ShowGame:
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.background = pygame.image.load('test.jpg')
+
+    def run(self):
+        "This method processes PyGame messages"
+
+        screen = pygame.display.get_surface()
+        screen.blit(self.background, (0, 0))
+        pygame.display.flip()
+
+    def loadPic(toShow):
+        archivo = os.path.join(toShow)
+        surface = pygame.image.load(archivo)
+        screen = pygame.display.get_surface()
+        #ventana = pygame.display.get_surface()
+        screen.blit(surface, (0,0))
+
+        pygame.display.flip()

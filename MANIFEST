@@ -4,3 +4,7 @@ XO2XOActivity.py
 activity/activity.info
 activity/XO2XO.svg
 icons/object-insert.svg
+test.jpg
+sugargame/canvas.py
+sugargame/event.py
+sugargame/__init__.py
