@@ -4,34 +4,34 @@ from sugar.activity import activity
 from sugar.graphics.toolbutton import ToolButton
 from sugar.graphics.toolbox import Toolbox
 from sugar.graphics.objectchooser import ObjectChooser
-
+import sugar.graphics.style as style
 import pygame, logging
 import gobject
-import sugargame.canvas
 
+
+BOXES_PAD = 2
 
 class XO2XOActivity(activity.Activity):
 
     def __init__(self, handle):
-        print "running activity init", handle
         activity.Activity.__init__(self, handle)
-        print "activity running"
-
+        print "***************** estoy en XO2XOActivity! *****************"
         toolbox = ActivityToolboxXO2XO(self)
         self.set_toolbox(toolbox)
-        toolbox.show()
+        toolbox.show()        # remove any children of the window that Sugar may have added
 
-        self.game = ShowGame()
+        #self._top_canvas_box = gtk.HBox(homogeneous=False)
+        #
 
-        self._pygamecanvas = \
-            sugargame.canvas.PygameCanvas(self)
-        # Note that set_canvas implicitly calls
-        # read_file when resuming from the Journal.
-        self.set_canvas(self._pygamecanvas)
+        self._top_canvas_box = View()
+        self._top_canvas_box.show()
 
-        # Start the game running.
-        self._pygamecanvas.run_pygame(self.game.run)
-        print "AT END OF THE CLASS"
+        # layout the screen
+        box = gtk.VBox(homogeneous=False)
+        box.pack_start(self._top_canvas_box)
+        box.show_all()
+        self.set_canvas(box)
+        print "----------- estoy en XO2XOActivity! ---------------------"
 
 class ActivityToolbarXO2XO(gtk.Toolbar):
     """The Activity toolbar with the Journal entry title, sharing
@@ -40,12 +40,11 @@ class ActivityToolbarXO2XO(gtk.Toolbar):
     All activities should have this toolbar. It is easiest to add it to your
     Activity by using the ActivityToolbox.
     """
-    print "***************** estoy aca! *****************"
+    print "***************** estoy en ActivityToolbarXO2XO! *****************"
     def __init__(self, activity, orientation_left=False):
         gtk.Toolbar.__init__(self)
 
         self._activity = activity
-        print "***************** estoy aca! 2 *****************"
         #if activity.metadata:
         #    title_button = TitleEntry(activity)
         #    title_button.show()
@@ -58,16 +57,15 @@ class ActivityToolbarXO2XO(gtk.Toolbar):
             separator.set_expand(True)
             self.insert(separator, -1)
             separator.show()
-        print "***************** estoy aca!3 *****************"
         self._object_insert = ToolButton('object-insert')
         self.insert(self._object_insert, -1)
         self._object_insert.show()
-        print "***************** estoy aca!4 *****************"
         self.stop = StopButton(activity)
         self.insert(self.stop, -1)
         self.stop.show()
 
         self._object_insert.connect('clicked', self.insertImage, activity)
+        print "----------- estoy en ActivityToolbarXO2XO! ---------------------"
 
     def insertImage(self, widget, activity):
         
@@ -81,22 +79,20 @@ class ActivityToolbarXO2XO(gtk.Toolbar):
                 if jobject and jobject.file_path:
                     self._activity.game.loadPic(jobject.file_path)
                     #self._activity.screen.loadImage(jobject.file_path)
-
-
         finally:
             chooser.destroy()
             del chooser
 
 
 class ActivityToolboxXO2XO(Toolbox):
-
+    print "***************** estoy en ActivityToolboxXO2XO! *****************"
     def __init__(self, activity):
         Toolbox.__init__(self)
 
         self._activity_toolbar = ActivityToolbarXO2XO(activity)
         self.add_toolbar('Activity', self._activity_toolbar)
         self._activity_toolbar.show()
-
+        print "----------- estoy en ActivityToolboxXO2XO! ---------------------"
     def get_activity_toolbar(self):
         return self._activity_toolbar
 
@@ -112,24 +108,48 @@ class StopButton(ToolButton):
     def __stop_button_clicked_cb(self, button, activity):
         activity.close()
 
-class ShowGame:
-    def __init__(self):
-        self.clock = pygame.time.Clock()
-        self.running = True
-        self.background = pygame.image.load('test.jpg')
 
-    def run(self):
-        "This method processes PyGame messages"
+class View(gtk.EventBox):
+    def __init__(self, fill_color=style.COLOR_BUTTON_GREY):
+        print "***************** estoy en View! *****************"
+        gtk.EventBox.__init__(self)
 
-        screen = pygame.display.get_surface()
-        screen.blit(self.background, (0, 0))
-        pygame.display.flip()
+        self.fill_color = fill_color
 
-    def loadPic(toShow):
-        archivo = os.path.join(toShow)
-        surface = pygame.image.load(archivo)
-        screen = pygame.display.get_surface()
-        #ventana = pygame.display.get_surface()
-        screen.blit(surface, (0,0))
+        # make an empty box 
+        self._leftBox= gtk.HBox()
+        self._leftBox.show()
 
-        pygame.display.flip()
+        # make an empty box 
+        self._rightBox= gtk.HBox()
+        self._rightBox.show()
+
+        # layout the screen
+        box = gtk.VBox(homogeneous=False)
+        box.pack_start(self._leftBox)
+        box.pack_start(self._rightBox, False)
+        box.set_border_width(BOXES_PAD)
+        self.modify_bg(gtk.STATE_NORMAL, self.fill_color.get_gdk_color())
+        self.add(box)
+        print "----------- estoy en View! ---------------------"
+
+
+    def update(self):
+        print "***************** estoy en View update! *****************"
+        leftPic = gtk.VBox()      
+        image = gtk.Image()
+        image.set_from_file("test.jpg")
+        leftPic.pack_start(image)
+        self._leftBox.append(leftPic)
+        self._leftBox.pack_start(leftPic, padding=BOXES_PAD)
+        leftPic.show()
+
+        rightPic = gtk.VBox()
+        image = gtk.Image()
+        image.set_from_file("test.jpg")
+        leftPic.pack_start(image)
+        self._rightBox.append(rightPic)
+        self._rightBox.pack_start(rightPic, padding=BOXES_PAD)
+        rightPic.show()
+        print "----------- estoy en View update! ---------------------"
+
