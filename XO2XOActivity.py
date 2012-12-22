@@ -5,6 +5,7 @@ import gobject, gtk, pygtk
 import sys, os, datetime
 sys.path.insert(0,"/home/olpc/Activities/XOtoXO.activity")
 import pygame
+import dbus
 
 from time import sleep
 from threading import Thread
@@ -53,11 +54,23 @@ class XO2XOActivity(activity.Activity):
         
         print "[END]xo2xo.init"
 
-    # implementing write_file
     def can_close(self):
         self.exiting = True
         self.sugarbar.stop()       
         return True
+
+    def _complete_close(self):
+        self.canLoop = False
+
+        if self.shared_activity:
+            self.shared_activity.leave()
+
+        self._cleanup_jobject()
+
+        # Make the exported object inaccessible
+        dbus.service.Object.remove_from_connection(self._bus)
+
+        self._session.unregister(self)
 
     # looping/looking for qr-codes 
     def processorLoop(self):
@@ -68,6 +81,8 @@ class XO2XOActivity(activity.Activity):
             # check if we saw some qr-codes
             if not self.exiting:
                 self.getQr() 
+        pygame.quit()
+        sys.exit()
         print "processorLoop finished"
 
     # calls SugarBar function that returns an array with decoded qrs
