@@ -83,7 +83,6 @@ class XO2XOActivity(activity.Activity):
                 self.getQr() 
         pygame.quit()
         sys.exit()
-        print "processorLoop finished"
 
     # calls SugarBar function that returns an array with decoded qrs
     def getQr(self):

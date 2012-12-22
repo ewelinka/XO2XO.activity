@@ -31,11 +31,11 @@ class SugarBar:
         print "[END]SugarBar.init"
 
     def stop(self):
-        print "Stop that cam!"
+        print "SugarBar.stop"
         if not self.stoppingCam:
-            print "stop it now!"
             self.stoppingCam = True
             self.cam.stop()
+        print "[END]SugarBar.stop"
 
     def getAndAnalize(self):
         if self.cam.query_image():
